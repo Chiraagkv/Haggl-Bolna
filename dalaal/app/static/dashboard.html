@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dalaal live board</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1c1b18;--mut:#6b6960;--line:#e3e0d6;--acc:#0b6e4f;--acc2:#e8f3ee;--warn:#9a5b00;--warn2:#fdf3df;--bad:#a12626;--bad2:#fbe9e9;--blue:#1d4f91;--blue2:#e8f0fb;--me:#f0efe9}
+@media (prefers-color-scheme:dark){:root{--bg:#141412;--card:#1d1d1a;--ink:#efede6;--mut:#a3a095;--line:#34332e;--acc:#59c79c;--acc2:#16291f;--warn:#e8b25a;--warn2:#2d2412;--bad:#ef8a8a;--bad2:#2e1717;--blue:#8db6f0;--blue2:#14233a;--me:#26261f}}
+[hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+h1{font-size:20px;margin:0;letter-spacing:.2px}h1 small{font-weight:400;color:var(--mut);font-size:13px;margin-left:8px}
+button,input,select{font:inherit;color:var(--ink)}button{border:1px solid var(--line);background:var(--card);padding:7px 14px;border-radius:8px;cursor:pointer}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}button:hover{filter:brightness(.97)}button:disabled{opacity:.5;cursor:default}
+input,select{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 9px;min-width:0}
+main{max-width:1240px;margin:0 auto;padding:16px 20px 40px;display:grid;gap:16px}
+.steps{display:flex;flex-wrap:wrap;gap:6px}.step{padding:5px 12px;border-radius:99px;border:1px solid var(--line);color:var(--mut);font-size:13px;background:var(--card)}
+.step.done{background:var(--acc2);color:var(--acc);border-color:transparent}.step.now{background:var(--acc);color:#fff;border-color:var(--acc)}.step.fail{background:var(--bad);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h2{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--mut);font-weight:600}
+.cols{display:grid;gap:16px;grid-template-columns:minmax(0,2fr) minmax(0,1fr)}@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.items{display:grid;gap:8px}.irow{display:grid;grid-template-columns:minmax(0,2fr) 90px 110px 34px;gap:8px}
+.frow{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:12px}.frow label{display:grid;gap:3px;font-size:12px;color:var(--mut)}
+.plan{margin-top:12px;font-size:14px}.pair{display:inline-flex;gap:6px;align-items:center;margin:4px 8px 4px 0;padding:4px 10px;border-radius:99px;background:var(--blue2);color:var(--blue);font-size:13px}
+.wave{margin-bottom:14px}.wave>.lbl{font-size:12px;color:var(--mut);margin:0 0 6px;text-transform:uppercase;letter-spacing:.6px}
+.calls{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.call{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.call.live{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}.call.win{border-color:var(--acc);background:var(--acc2)}
+.call .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.nm{font-weight:600}.mut{color:var(--mut);font-size:12px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mut);margin-right:6px;vertical-align:middle}
+.dot.on{background:var(--acc);animation:pulse 1.2s infinite}.dot.ring{background:var(--warn);animation:pulse 1.2s infinite}@keyframes pulse{50%{opacity:.25}}
+.badge{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;margin-right:4px;background:var(--blue2);color:var(--blue)}
+.badge.ok{background:var(--acc2);color:var(--acc)}.badge.bad{background:var(--bad2);color:var(--bad)}.badge.warn{background:var(--warn2);color:var(--warn)}
+.q{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:3px 0;border-top:1px dashed var(--line)}.q .p{font-variant-numeric:tabular-nums;white-space:nowrap}
+.said{font-size:12px;color:var(--mut);font-style:italic}
+.tr{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:4px;font-size:13px;margin-top:2px}
+.b{padding:5px 9px;border-radius:10px;max-width:88%;white-space:pre-wrap}.b.a{background:var(--blue2);align-self:flex-start}.b.u{background:var(--me);align-self:flex-end}
+.wait{font-size:12px;color:var(--mut);font-style:italic}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}th,td{padding:6px 4px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}tr.win td{font-weight:700;color:var(--acc)}
+.note{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--warn2);color:var(--warn);font-size:13px}.note.good{background:var(--acc2);color:var(--acc)}.note.bad{background:var(--bad2);color:var(--bad)}
+.big{font-size:34px;font-weight:700;letter-spacing:-.5px;color:var(--acc)}.kv{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:14px}.kv span:first-child{color:var(--mut)}
+#feed{max-height:300px;overflow:auto;font-size:13px}.ev{padding:4px 0;border-bottom:1px solid var(--line)}.ev time{color:var(--mut);margin-right:8px;font-size:12px}
+.receipt{max-width:620px;margin:0 auto;font-variant-numeric:tabular-nums}.receipt h3{margin:14px 0 4px;font-size:15px}.receipt .head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:8px}
+.receipt .tot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:none}
+@media print{header,#newcard,#steps,#live,#side,.noprint{display:none!important}body{background:#fff;color:#000}.card{border:none}main{padding:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Dalaal <small>AI procurement agent · live board</small></h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <span id="mode" class="badge"></span>
+    <select id="orders"></select>
+    <button id="kill">Stop order</button>
+  </div>
+</header>
+<main>
+  <section class="card" id="newcard">
+    <h2>New order <span id="who" class="mut" style="text-transform:none;letter-spacing:0"></span></h2>
+    <div class="items" id="items"></div>
+    <datalist id="known"></datalist>
+    <div class="frow">
+      <button id="add" type="button">+ Add item</button>
+      <label>Deliver by<input id="deadline" type="time" value="07:00"></label>
+      <label>Budget (₹, optional)<input id="budget" type="number" min="0" step="10" style="width:130px"></label>
+      <span style="flex:1"></span>
+      <button id="fill" type="button">Fill demo order</button>
+      <button id="go" class="primary" type="button">Start calling</button>
+    </div>
+    <div class="plan" id="plan"></div>
+  </section>
+
+  <div class="steps" id="steps"></div>
+
+  <section class="card" id="receiptcard" hidden>
+    <div class="noprint" style="display:flex;justify-content:space-between;align-items:center"><h2>Receipt</h2><button onclick="window.print()">Print / save PDF</button></div>
+    <div class="receipt" id="receipt"></div>
+  </section>
+
+  <div class="cols" id="board" hidden>
+    <div id="live" style="display:grid;gap:16px">
+      <section class="card"><h2>Round 1 · quotes, two calls at a time</h2><div id="r1"></div></section>
+      <section class="card" id="r2card" hidden><h2>Round 2 · bargaining with real prices</h2><div class="calls" id="r2"></div></section>
+      <section class="card" id="bookcard" hidden><h2>Owner &amp; booking</h2><div class="calls" id="book"></div></section>
+    </div>
+    <div id="side" style="display:grid;gap:16px;align-content:start">
+      <section class="card"><h2>Result</h2><div id="result"></div></section>
+      <section class="card"><h2>Ranking — expected cost</h2><div id="rank"></div><div id="notes"></div></section>
+      <section class="card"><h2>Live feed</h2><div id="feed"></div></section>
+    </div>
+  </div>
+</main>
+<script>
+const STEPS=[["COLLECTING_R1","Round 1 quotes"],["RANKED","Ranked"],["NEGOTIATING_R2","Round 2"],["RERANKED","Re-ranked"],["AWAITING_APPROVAL","Owner approval"],["BOOKING","Booking"],["BOOKED","Booked"],["REPORTED","Receipt"]];
+const LIVE=new Set(["queued","initiated","ringing","in-progress","call-disconnected"]);
+const $=id=>document.getElementById(id);const inr=x=>x==null?"—":"₹"+Number(x).toLocaleString("en-IN",{maximumFractionDigits:2});
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let cur=null,es=null,setup=null,last=null;
+async function j(u,o){const r=await fetch(u,o);if(!r.ok){let m=await r.text();try{m=JSON.parse(m).detail||m}catch(e){}throw new Error(m)}return r.json()}
+const post=(u,b)=>j(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b||{})});
+
+// ---------------------------------------------------------------- order form
+function itemRow(it={}){const d=document.createElement("div");d.className="irow";
+ d.innerHTML=`<input list="known" placeholder="item, e.g. onions" value="${esc(it.name||"")}" class="nm-in"><input type="number" min="0" step="any" placeholder="qty" value="${esc(it.quantity??"")}" class="qty-in"><select class="unit-in">${["kg","litre","piece","dozen","quintal","gram"].map(u=>`<option ${u==(it.unit||"kg")?"selected":""}>${u}</option>`).join("")}</select><button type="button" title="remove">×</button>`;
+ d.querySelector("button").onclick=()=>{d.remove();plan()};d.querySelectorAll("input,select").forEach(e=>e.oninput=plan);$("items").append(d)}
+function formOrder(){const items=[...document.querySelectorAll(".irow")].map(r=>({name:r.querySelector(".nm-in").value.trim().toLowerCase(),quantity:+r.querySelector(".qty-in").value,unit:r.querySelector(".unit-in").value})).filter(i=>i.name&&i.quantity>0);
+ const b=$("budget").value;return{items,deadline:$("deadline").value||"07:00",budget:b===""?null:+b}}
+let planT=null;function plan(){clearTimeout(planT);planT=setTimeout(async()=>{const o=formOrder();if(!o.items.length){$("plan").innerHTML="";return}
+ try{const p=await post("/api/orders/preview",o);let h=p.waves.length?`Dalaal will call: `+p.waves.map((w,i)=>`<span class="pair"><b>Pair ${i+1}</b> ${w.map(x=>esc(x.name)+` <span class="mut">(${esc(x.sells.join(", "))})</span>`).join(" + ")}</span>`).join("")+` <span class="mut">· about ${inr(p.estimated_cost_inr)} of call credit</span>`:`<span class="note bad">Nobody to call: no supplier that can be dialed sells these items.</span>`;
+  if(p.uncovered.length)h+=`<div class="note">No supplier sells: ${esc(p.uncovered.join(", "))}</div>`;$("plan").innerHTML=h}catch(e){$("plan").innerHTML=`<div class="note bad">${esc(e.message)}</div>`}},250)}
+function fillDemo(){const d=setup.demo_order;$("items").innerHTML="";d.items.forEach(itemRow);$("deadline").value=d.deadline;$("budget").value=d.budget??"";plan()}
+$("add").onclick=()=>itemRow();$("fill").onclick=fillDemo;$("deadline").oninput=plan;$("budget").oninput=plan;
+$("go").onclick=async()=>{const o=formOrder();if(!o.items.length)return alert("Add at least one item with a quantity.");
+ if(setup.provider!="fake"&&!confirm("This phones the suppliers' real numbers and spends Bolna credit. Start?"))return;
+ $("go").disabled=true;try{const r=await post("/api/orders",o);if(!r.started)alert("The order was created but could not start: see the board.");cur=r.order_id;await loadOrders();refresh();connect()}catch(e){alert("Could not start: "+e.message)}finally{$("go").disabled=false}};
+
+// ---------------------------------------------------------------- board
+async function loadOrders(){const l=await j("/api/orders");const s=$("orders");s.innerHTML=l.length?l.map(o=>`<option value="${o.id}">Order #${o.id} · ${o.state}</option>`).join(""):"<option>no orders yet</option>";
+ if(l.length&&(cur==null||!l.find(o=>o.id==cur)))cur=l[0].id;if(cur!=null)s.value=cur;return l}
+function steps(o){const idx=STEPS.findIndex(s=>s[0]==o.state);
+ $("steps").innerHTML=STEPS.filter(s=>s[0]!="AWAITING_APPROVAL"||o.approval).map(([k,l])=>{const ki=STEPS.findIndex(s=>s[0]==k);let c="step";
+  if(o.state!="FAILED"){if(ki<idx||o.state=="REPORTED")c+=" done";else if(ki==idx)c+=" now"}return `<span class="${c}">${l}</span>`}).join("")+(o.state=="FAILED"?`<span class="step fail">Failed: ${esc((o.failure_reason||"").replaceAll("_"," "))}</span>`:"")}
+const STATUS={pending:"waiting for a free line",queued:"queued",initiated:"dialing",ringing:"ringing","in-progress":"on the call","call-disconnected":"hung up · finishing",completed:"done","no-answer":"no answer",busy:"busy",failed:"failed",canceled:"cancelled",stopped:"stopped",error:"error","balance-low":"out of credit"};
+function since(t){if(!t)return"";const s=Math.max(0,Math.round((Date.now()-new Date(t))/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
+function bubbles(t){return t.split(/\n(?=(?:assistant|user|agent|supplier|owner)\s*:)/i).map(l=>{const m=l.match(/^\s*(assistant|user|agent|supplier|owner)\s*:\s*([\s\S]*)$/i);if(!m)return l.trim()?`<div class="b a">${esc(l)}</div>`:"";
+ const me=/assistant|agent/i.test(m[1]);return m[2].trim()?`<div class="b ${me?"a":"u"}">${esc(m[2].trim())}</div>`:""}).join("")}
+function callCard(c,s,title,extra=""){const live=LIVE.has(c.status);const ring=["queued","initiated","ringing"].includes(c.status);
+ const bad=["no-answer","busy","failed","error","balance-low"].includes(c.status);
+ const qs=s.quotes.filter(q=>q.supplier==c.supplier&&q.round==c.round&&c.kind.startsWith("supplier"));
+ const lines=qs.map(q=>`<div class="q"><span>${esc(q.item)}${q.available===false?" — not available":""}${q.said?`<div class="said">“${esc(q.said)}”</div>`:""}</span><span class="p">${q.flagged?`<span class="badge bad">check: ${esc(q.flag_reason)}</span>`:q.price==null?"—":"₹"+esc(q.price)+"/"+esc(q.unit||"")}${q.provisional?' <span class="badge warn">heard live</span>':' <span class="badge ok">confirmed</span>'}${q.credit_days?` <span class="badge ok">${q.credit_days}d credit</span>`:""}</span></div>`).join("");
+ const tr=c.transcript?`<details ${live||!c.completed_at||Date.now()-new Date(c.completed_at)<120000?"open":""}><summary class="mut">Transcript</summary><div class="tr">${bubbles(c.transcript)}</div></details>`:(live&&!ring?`<div class="wait">Talking… prices appear here the moment they are confirmed; the full transcript arrives when the call ends.</div>`:"");
+ return `<div class="call ${live&&!ring?"live":""}"><div class="top"><span class="nm">${esc(title)}</span><span class="mut"><span class="dot ${live&&!ring?"on":ring?"ring":""}"></span>${esc(STATUS[c.status]||c.status)}${c.placed_at&&live?` · <span data-since="${esc(c.placed_at)}">${since(c.placed_at)}</span>`:c.duration?` · ${Math.round(c.duration)}s`:""}${c.ended_because?` · ${esc(c.ended_because)}`:""}</span></div>${extra}${lines}${tr}${bad?`<div class="note bad">${esc(STATUS[c.status]||c.status)}</div>`:""}</div>`}
+function render(s){last=s;const o=s.order;$("board").hidden=false;steps(o);const nm=k=>s.suppliers[k]?.name||k||"Owner";
+ const r1=s.calls.filter(c=>c.kind=="supplier_r1");const waves={};r1.forEach(c=>(waves[c.wave??0]??=[]).push(c));
+ $("r1").innerHTML=Object.keys(waves).length?Object.keys(waves).sort((a,b)=>a-b).map(w=>`<div class="wave"><div class="lbl">Pair ${+w+1}${+w>0?" · already knows the best real price from earlier pairs":""}</div><div class="calls">${waves[w].map(c=>callCard(c,s,nm(c.supplier),c.anchors.length?`<div class="mut">Told: ${esc(c.anchors.map(a=>a.item+" ₹"+a.price+"/"+a.unit).join(", "))} (a real quote)</div>`:"")).join("")}</div></div>`).join(""):'<div class="mut">No supplier calls yet.</div>';
+ const r2=s.calls.filter(c=>c.kind=="supplier_r2");$("r2card").hidden=!r2.length;
+ $("r2").innerHTML=r2.map(c=>callCard(c,s,nm(c.supplier),c.counter.length?`<div class="mut">Counter-offer: ${esc(c.counter.map(x=>x.item+" ₹"+x.price).join(", "))} (another supplier's real quote)</div>`:"")).join("");
+ const KIND={approval:"Owner approval",confirm:"Booking confirmation",callback:"Owner report",intake:"Owner order call"};
+ const bk=s.calls.filter(c=>KIND[c.kind]);$("bookcard").hidden=!bk.length;
+ $("book").innerHTML=bk.map(c=>callCard(c,s,KIND[c.kind]+(c.supplier?" · "+nm(c.supplier):""))).join("");
+ // ranking
+ const r=s.ranking;let html="",notes="";
+ if(r&&r.ranked){html=`<table><tr><th>Supplier</th><th>Quote</th><th>Credit</th><th>P(late)</th><th>Expected</th></tr>`+r.ranked.map((x,i)=>`<tr class="${i==0?"win":""}"><td>${esc(x.name)}</td><td>${inr(x.quoted_total)}</td><td>${x.credit_value?"−"+inr(x.credit_value):"—"}</td><td>${Math.round(x.p_late*100)}%</td><td>${inr(x.expected_cost)}</td></tr>`).join("")+`</table>`;
+  (r.infeasible||[]).forEach(x=>notes+=`<div class="note bad"><b>${esc(x.name)}</b> out: ${esc(x.reasons.join("; "))}</div>`);
+  if(r.ranked_lower)notes+=`<div class="note">${esc(r.ranked_lower.text)}</div>`;
+  (r.round2_changes||[]).forEach(c=>notes+=`<div class="note good">Round 2: ${esc(nm(c.key))} ${inr(c.from)} → ${inr(c.to)}${c.credit_days?` + ${c.credit_days} days credit`:""}</div>`);
+  const d=r.decision;if(d&&d.kind=="split")notes+=`<div class="note good">Split basket saves ${inr(d.split_saving)} over the best single supplier.</div>`;
+  (r.flagged||[]).forEach(f=>notes+=`<div class="note bad">Not used: ${esc(f.supplier)} ${esc(f.item)} — ${esc(f.reason)}</div>`)}
+ else html='<div class="mut">Waiting for round 1 to finish…</div>';
+ $("rank").innerHTML=`<div style="overflow-x:auto">${html}</div>`;$("notes").innerHTML=notes;
+ let res="";if(o.booked_total!=null){res=`<div class="big">${o.savings!=null?inr(o.savings):inr(o.booked_total)}</div><div class="mut">${o.savings!=null?"saved "+(o.baseline_kind=="owner_last_paid_price"?"vs what the owner paid last time":"vs the usual supplier’s quote today"):"booked total"}</div><div style="height:8px"></div><div class="kv"><span>Booked total</span><b>${inr(o.booked_total)}</b></div><div class="kv"><span>Baseline</span><b>${inr(o.baseline_total)}</b></div>`}
+ else res='<div class="mut">Not booked yet.</div>';
+ if(o.approval)res+=`<div class="note">${o.approval.status=="pending"?"Waiting for owner: ":"Owner "+esc(o.approval.status)+": "}${esc((o.approval.reasons||[]).join("; "))}</div>`;
+ if(o.state=="FAILED")res+=`<div class="note bad">Stopped: ${esc((o.failure_reason||"").replaceAll("_"," "))}. Nothing was booked.</div>`;
+ res+=`<div class="kv"><span>Call credit used</span><b>${o.cost_incurred?inr(o.cost_incurred):"—"}</b></div>`;$("result").innerHTML=res;
+ $("feed").innerHTML=s.feed.slice().reverse().map(e=>`<div class="ev"><time>${new Date(e.at).toLocaleTimeString()}</time>${esc(text(e,nm))}</div>`).join("");
+ receipt(s.receipt)}
+function receipt(rc){$("receiptcard").hidden=!rc;if(!rc)return;
+ const sup=rc.suppliers.map(p=>`<h3>${esc(p.name)}</h3><table><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>${p.lines.map(l=>`<tr><td>${esc(l.item)}</td><td>${esc(l.quantity)} ${esc(l.unit)}</td><td>${inr(l.unit_price)}/${esc(l.unit)}</td><td>${inr(l.amount)}</td></tr>`).join("")}${p.delivery_fee?`<tr><td>Delivery</td><td></td><td></td><td>${inr(p.delivery_fee)}</td></tr>`:""}<tr><td colspan="3">Subtotal</td><td><b>${inr(p.subtotal)}</b></td></tr></table>
+  <div class="mut">Delivery ${p.delivery_time?"at "+esc(p.delivery_time):"by "+esc(rc.deadline)}${p.credit_days?` · ${p.credit_days} days credit`:" · pay on delivery"} · confirmed on the phone by the supplier</div>`).join("");
+ $("receipt").innerHTML=`<div class="head"><div><b style="font-size:18px">${esc(rc.business_name)}</b><div class="mut">Purchase receipt · ${esc(rc.order_no)}</div></div><div class="mut" style="text-align:right">${new Date(rc.date).toLocaleString()}<br>Ordered for ${esc(rc.owner)}${rc.approved_by_owner?" · approved by phone":""}</div></div>${sup}
+  <table style="margin-top:14px"><tr class="tot"><td>Total to pay</td><td>${inr(rc.total)}</td></tr>${rc.savings!=null?`<tr><td>${rc.baseline_kind=="owner_last_paid_price"?"Last time you paid":"Usual supplier today"}</td><td>${inr(rc.baseline)}</td></tr><tr><td><b style="color:var(--acc)">You saved</b></td><td><b style="color:var(--acc)">${inr(rc.savings)}</b></td></tr>`:""}
+  <tr><td class="mut">Phone time saved</td><td class="mut">${rc.time_saved_min!=null?rc.time_saved_min+" min":"—"}</td></tr><tr><td class="mut">Dalaal made ${rc.calls_made} calls · call credit used</td><td class="mut">${inr(rc.call_cost)}</td></tr></table>`}
+function text(e,nm){const p=e.payload||{};switch(e.type){case"created":return"Order created";case"state":return"→ "+(p.state||"")+(p.reason?" ("+p.reason+")":"");
+ case"round1_waves":return"Grouped by what they sell: "+(p.waves||[]).map((w,i)=>`pair ${i+1} = ${w.map(nm).join(" + ")}`).join("; ");
+ case"anchor":return`${nm(p.supplier)} will hear the best real price so far: ${(p.anchors||[]).map(a=>a.item+" ₹"+a.price).join(", ")}`;
+ case"call_placed":return`Calling ${nm(p.supplier)||p.kind}`;case"call":return`${p.supplier?nm(p.supplier):p.kind}: ${STATUS[p.status]||p.status}`;case"quote":return`${nm(p.supplier)}: ${p.item} ₹${p.price}/${p.unit}${p.provisional?" (heard live)":" (confirmed)"}`;
+ case"notify":return"Owner message: "+p.text;case"guard":return"Blocked: "+p.reason;case"rebook":return"Re-planning after "+(p.failed||[]).join(", ")+" could not confirm";
+ case"confirm_failed":return`${nm(p.supplier)} did not confirm: ${p.reason}`;case"call_planned":return`Planned ${p.kind} call${p.supplier?" to "+nm(p.supplier):""}`;case"voicemail":return`${nm(p.supplier)} went to voicemail`;case"polled":return"Recovered a missed update by polling";case"retry":return`Trying ${nm(p.supplier)} again`;default:return e.type}}
+async function refresh(){if(cur==null)return;try{render(await j(`/api/orders/${cur}/state`));loadOrders()}catch(e){console.log(e)}}
+function connect(){if(es)es.close();if(cur==null)return;es=new EventSource(`/api/orders/${cur}/stream`);es.onmessage=refresh;
+ ["state","call","quote","call_placed","notify","created","guard","rebook","confirm_failed","polled","call_planned","voicemail","round1_waves","anchor","retry"].forEach(t=>es.addEventListener(t,refresh))}
+$("orders").onchange=e=>{cur=+e.target.value;refresh();connect()};
+$("kill").onclick=async()=>{if(cur!=null&&confirm("Stop this order? Pending calls are cancelled."))await post(`/api/orders/${cur}/kill`);refresh()};
+setInterval(()=>document.querySelectorAll("[data-since]").forEach(e=>e.textContent=since(e.dataset.since)),1000);
+(async()=>{try{const h=await j("/health");$("mode").textContent=h.kill_switch?"KILL SWITCH ON":(h.provider=="fake"?"SIMULATED suppliers":"LIVE calls");$("mode").className="badge "+(h.provider=="fake"?"warn":"ok")}catch(e){}
+ try{setup=await j("/api/setup");$("who").textContent=`· for ${setup.owner.business_name}`;$("known").innerHTML=setup.known_items.map(i=>`<option value="${esc(i)}">`).join("");fillDemo()}catch(e){$("plan").innerHTML=`<div class="note bad">${esc(e.message)}</div>`}
+ const l=await loadOrders();if(l.length){refresh();connect()}setInterval(refresh,3000)})();
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+{
+  "agent_config": {
+    "agent_name": "Dalaal owner intake",
+    "agent_welcome_message": "Namaste {owner_name} ji, main Dalaal bol raha hoon, automated assistant. Bataiye, kya mangwana hai?",
+    "webhook_url": "https://example.ngrok.app/webhook/bolna",
+    "tasks": [
+      {
+        "task_type": "conversation",
+        "toolchain": {
+          "execution": "sequential",
+          "pipelines": [
+            [
+              "transcriber",
+              "llm",
+              "synthesizer"
+            ]
+          ]
+        },
+        "tools_config": {
+          "llm_agent": {
+            "agent_type": "simple_llm_agent",
+            "agent_flow_type": "streaming",
+            "llm_config": {
+              "provider": "openai",
+              "model": "gpt-4.1-mini",
+              "max_tokens": 150,
+              "temperature": 0.2
+            }
+          },
+          "synthesizer": {
+            "provider": "sarvam",
+            "provider_config": {
+              "voice": "kavya",
+              "voice_id": "kavya",
+              "model": "bulbul:v3",
+              "language": "hi"
+            },
+            "stream": true,
+            "buffer_size": 100,
+            "audio_format": "wav"
+          },
+          "transcriber": {
+            "provider": "sarvam",
+            "model": "saaras:v4",
+            "language": "hi",
+            "stream": true,
+            "encoding": "linear16",
+            "sampling_rate": 16000,
+            "endpointing": 100
+          },
+          "input": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "output": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "multilingual_config": {
+            "enabled": true,
+            "active_language": "hi",
+            "language_switch_trigger": "requested_or_auto_detected",
+            "languages": {
+              "hi": {
+                "transcriber": {
+                  "language": "hi"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "hi"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant for small shops. The owner has called you to place an order by voice. Say clearly that you are an automated assistant.\n\nCollect three things: (1) each item with quantity and unit, (2) the delivery deadline, (3) their budget if they have one. Repeat everything back (\"20 kilo pyaaz, 10 litre tel, subah 7 baje tak, budget 1200, sahi hai?\") and wait for a clear yes before ending.\n\nNever quote prices or promise anything. Say: \"Main suppliers se bhaav le kar aapko batata hoon.\" Keep the call under 80 seconds. The order is read from this call's extraction `order_json`.\n\nLANGUAGE: speak Hindi now (Hindi or Hinglish, as they speak). The *_spoken values above are written in Hindi: say them naturally in Hindi, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Namaste {owner_name} ji, main Dalaal bol raha hoon, automated assistant. Bataiye, kya mangwana hai?"
+              },
+              "en": {
+                "transcriber": {
+                  "language": "en"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "en"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant for small shops. The owner has called you to place an order by voice. Say clearly that you are an automated assistant.\n\nCollect three things: (1) each item with quantity and unit, (2) the delivery deadline, (3) their budget if they have one. Repeat everything back (\"20 kilo pyaaz, 10 litre tel, subah 7 baje tak, budget 1200, sahi hai?\") and wait for a clear yes before ending.\n\nNever quote prices or promise anything. Say: \"Main suppliers se bhaav le kar aapko batata hoon.\" Keep the call under 80 seconds. The order is read from this call's extraction `order_json`.\n\nLANGUAGE: speak English now (simple Indian English). The *_spoken values above are written in Hindi: say them naturally in English, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Hello {owner_name}, this is Dalaal, your automated assistant. What would you like to order?"
+              },
+              "kn": {
+                "transcriber": {
+                  "language": "kn"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "kn"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant for small shops. The owner has called you to place an order by voice. Say clearly that you are an automated assistant.\n\nCollect three things: (1) each item with quantity and unit, (2) the delivery deadline, (3) their budget if they have one. Repeat everything back (\"20 kilo pyaaz, 10 litre tel, subah 7 baje tak, budget 1200, sahi hai?\") and wait for a clear yes before ending.\n\nNever quote prices or promise anything. Say: \"Main suppliers se bhaav le kar aapko batata hoon.\" Keep the call under 80 seconds. The order is read from this call's extraction `order_json`.\n\nLANGUAGE: speak Kannada now (in Kannada script). The *_spoken values above are written in Hindi: say them naturally in Kannada, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "ನಮಸ್ಕಾರ {owner_name}, ನಾನು ದಲಾಲ್, ಸ್ವಯಂಚಾಲಿತ ಸಹಾಯಕ. ಏನು ತರಿಸಬೇಕು ಹೇಳಿ?"
+              }
+            }
+          }
+        },
+        "task_config": {
+          "call_terminate": 90,
+          "hangup_after_silence": 10
+        }
+      }
+    ]
+  },
+  "agent_prompts": {
+    "task_1": {
+      "system_prompt": "You are Dalaal, an automated purchasing assistant for small shops. The owner has called you to place an order by voice. Say clearly that you are an automated assistant.\n\nCollect three things: (1) each item with quantity and unit, (2) the delivery deadline, (3) their budget if they have one. Repeat everything back (\"20 kilo pyaaz, 10 litre tel, subah 7 baje tak, budget 1200, sahi hai?\") and wait for a clear yes before ending.\n\nNever quote prices or promise anything. Say: \"Main suppliers se bhaav le kar aapko batata hoon.\" Keep the call under 80 seconds. The order is read from this call's extraction `order_json`."
+    }
+  }
+}

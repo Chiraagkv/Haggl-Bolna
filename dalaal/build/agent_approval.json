@@ -1,0 +1,127 @@
+{
+  "agent_config": {
+    "agent_name": "Dalaal owner approval",
+    "agent_welcome_message": "Namaste {owner_name} ji, main Dalaal bol raha hoon, automated assistant. Ek order ke baare mein aapki haan chahiye.",
+    "webhook_url": "https://example.ngrok.app/webhook/bolna",
+    "tasks": [
+      {
+        "task_type": "conversation",
+        "toolchain": {
+          "execution": "sequential",
+          "pipelines": [
+            [
+              "transcriber",
+              "llm",
+              "synthesizer"
+            ]
+          ]
+        },
+        "tools_config": {
+          "llm_agent": {
+            "agent_type": "simple_llm_agent",
+            "agent_flow_type": "streaming",
+            "llm_config": {
+              "provider": "openai",
+              "model": "gpt-4.1-mini",
+              "max_tokens": 150,
+              "temperature": 0.2
+            }
+          },
+          "synthesizer": {
+            "provider": "sarvam",
+            "provider_config": {
+              "voice": "kavya",
+              "voice_id": "kavya",
+              "model": "bulbul:v3",
+              "language": "hi"
+            },
+            "stream": true,
+            "buffer_size": 100,
+            "audio_format": "wav"
+          },
+          "transcriber": {
+            "provider": "sarvam",
+            "model": "saaras:v4",
+            "language": "hi",
+            "stream": true,
+            "encoding": "linear16",
+            "sampling_rate": 16000,
+            "endpointing": 100
+          },
+          "input": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "output": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "multilingual_config": {
+            "enabled": true,
+            "active_language": "hi",
+            "language_switch_trigger": "requested_or_auto_detected",
+            "languages": {
+              "hi": {
+                "transcriber": {
+                  "language": "hi"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "hi"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner. Be brief and clear. You are asking for ONE decision.\n\nSay who you are, then read this summary exactly, in your own natural words, without changing any number: {summary}\n\nAsk: \"Kya main yeh order book kar dun?\" Accept only a clear yes or no. If they ask for something else (a different supplier, a different quantity), say you will pass it on and that nothing will be booked until they say yes.\n\nRepeat the decision back (\"Theek hai, book kar raha hoon\" or \"Theek hai, book nahi karunga\") and end the call. Never book, promise or change anything yourself. If they do not answer clearly after two tries, say you will not book anything and end the call.\n\nLANGUAGE: speak Hindi now (Hindi or Hinglish, as they speak). The *_spoken values above are written in Hindi: say them naturally in Hindi, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Namaste {owner_name} ji, main Dalaal bol raha hoon, automated assistant. Ek order ke baare mein aapki haan chahiye."
+              },
+              "en": {
+                "transcriber": {
+                  "language": "en"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "en"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner. Be brief and clear. You are asking for ONE decision.\n\nSay who you are, then read this summary exactly, in your own natural words, without changing any number: {summary}\n\nAsk: \"Kya main yeh order book kar dun?\" Accept only a clear yes or no. If they ask for something else (a different supplier, a different quantity), say you will pass it on and that nothing will be booked until they say yes.\n\nRepeat the decision back (\"Theek hai, book kar raha hoon\" or \"Theek hai, book nahi karunga\") and end the call. Never book, promise or change anything yourself. If they do not answer clearly after two tries, say you will not book anything and end the call.\n\nLANGUAGE: speak English now (simple Indian English). The *_spoken values above are written in Hindi: say them naturally in English, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Hello {owner_name}, this is Dalaal, your automated assistant. I need your yes on an order."
+              },
+              "kn": {
+                "transcriber": {
+                  "language": "kn"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "kn"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner. Be brief and clear. You are asking for ONE decision.\n\nSay who you are, then read this summary exactly, in your own natural words, without changing any number: {summary}\n\nAsk: \"Kya main yeh order book kar dun?\" Accept only a clear yes or no. If they ask for something else (a different supplier, a different quantity), say you will pass it on and that nothing will be booked until they say yes.\n\nRepeat the decision back (\"Theek hai, book kar raha hoon\" or \"Theek hai, book nahi karunga\") and end the call. Never book, promise or change anything yourself. If they do not answer clearly after two tries, say you will not book anything and end the call.\n\nLANGUAGE: speak Kannada now (in Kannada script). The *_spoken values above are written in Hindi: say them naturally in Kannada, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "ನಮಸ್ಕಾರ {owner_name}, ನಾನು ದಲಾಲ್, ಸ್ವಯಂಚಾಲಿತ ಸಹಾಯಕ. ಒಂದು ಆರ್ಡರ್‌ಗೆ ನಿಮ್ಮ ಒಪ್ಪಿಗೆ ಬೇಕು."
+              }
+            }
+          }
+        },
+        "task_config": {
+          "call_terminate": 60,
+          "hangup_after_silence": 10
+        }
+      }
+    ]
+  },
+  "agent_prompts": {
+    "task_1": {
+      "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner. Be brief and clear. You are asking for ONE decision.\n\nSay who you are, then read this summary exactly, in your own natural words, without changing any number: {summary}\n\nAsk: \"Kya main yeh order book kar dun?\" Accept only a clear yes or no. If they ask for something else (a different supplier, a different quantity), say you will pass it on and that nothing will be booked until they say yes.\n\nRepeat the decision back (\"Theek hai, book kar raha hoon\" or \"Theek hai, book nahi karunga\") and end the call. Never book, promise or change anything yourself. If they do not answer clearly after two tries, say you will not book anything and end the call."
+    }
+  }
+}

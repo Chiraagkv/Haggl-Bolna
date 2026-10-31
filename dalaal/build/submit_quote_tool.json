@@ -1,0 +1,73 @@
+{
+  "name": "submit_quote",
+  "description": "Call this immediately after the supplier has said a price for ONE item and you have repeated it back and they have confirmed it. Call it once per item. Never call it with a guessed price.",
+  "pre_call_message": "",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "call_ref": {
+        "type": "string",
+        "description": "The call reference given in your instructions. Always pass it exactly as given."
+      },
+      "item": {
+        "type": "string",
+        "description": "The item name in English, for example onions or oil."
+      },
+      "unit_price": {
+        "type": "string",
+        "description": "The price exactly as the supplier said it, for example 'pachchis rupaye' or '25'."
+      },
+      "unit": {
+        "type": "string",
+        "description": "The unit the price is per, for example kg, quintal or litre."
+      },
+      "available": {
+        "type": "boolean",
+        "description": "Whether the supplier has the full requested quantity."
+      },
+      "delivery_time": {
+        "type": "string",
+        "description": "When they can deliver, for example 07:00."
+      },
+      "credit_days": {
+        "type": "string",
+        "description": "Days of credit they offer. 0 if none."
+      },
+      "delivery_fee": {
+        "type": "string",
+        "description": "Delivery charge in rupees. 0 if none."
+      },
+      "what_they_said": {
+        "type": "string",
+        "description": "The supplier's own words about this price."
+      }
+    },
+    "required": [
+      "call_ref",
+      "item",
+      "unit_price",
+      "unit"
+    ]
+  },
+  "key": "custom_task",
+  "value": {
+    "method": "POST",
+    "param": {
+      "call_ref": "%(call_ref)s",
+      "item": "%(item)s",
+      "unit_price": "%(unit_price)s",
+      "unit": "%(unit)s",
+      "available": "%(available)s",
+      "delivery_time": "%(delivery_time)s",
+      "credit_days": "%(credit_days)s",
+      "delivery_fee": "%(delivery_fee)s",
+      "what_they_said": "%(what_they_said)s"
+    },
+    "url": "https://example.ngrok.app/tools/submit_quote",
+    "api_token": null,
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Dalaal-Token": ""
+    }
+  }
+}

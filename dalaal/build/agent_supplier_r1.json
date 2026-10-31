@@ -1,0 +1,196 @@
+{
+  "agent_config": {
+    "agent_name": "Dalaal supplier agent (round 1)",
+    "agent_welcome_message": "Namaste, main {business_name} ka automated assistant hoon. Aaj ka bhaav poochna tha.",
+    "webhook_url": "https://example.ngrok.app/webhook/bolna",
+    "tasks": [
+      {
+        "task_type": "conversation",
+        "toolchain": {
+          "execution": "sequential",
+          "pipelines": [
+            [
+              "transcriber",
+              "llm",
+              "synthesizer"
+            ]
+          ]
+        },
+        "tools_config": {
+          "llm_agent": {
+            "agent_type": "simple_llm_agent",
+            "agent_flow_type": "streaming",
+            "llm_config": {
+              "provider": "openai",
+              "model": "gpt-4.1-mini",
+              "max_tokens": 150,
+              "temperature": 0.2
+            }
+          },
+          "synthesizer": {
+            "provider": "sarvam",
+            "provider_config": {
+              "voice": "kavya",
+              "voice_id": "kavya",
+              "model": "bulbul:v3",
+              "language": "hi"
+            },
+            "stream": true,
+            "buffer_size": 100,
+            "audio_format": "wav"
+          },
+          "transcriber": {
+            "provider": "sarvam",
+            "model": "saaras:v4",
+            "language": "hi",
+            "stream": true,
+            "encoding": "linear16",
+            "sampling_rate": 16000,
+            "endpointing": 100
+          },
+          "input": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "output": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "api_tools": {
+            "tools": [
+              {
+                "name": "submit_quote",
+                "description": "Call this immediately after the supplier has said a price for ONE item and you have repeated it back and they have confirmed it. Call it once per item. Never call it with a guessed price.",
+                "pre_call_message": "",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "call_ref": {
+                      "type": "string",
+                      "description": "The call reference given in your instructions. Always pass it exactly as given."
+                    },
+                    "item": {
+                      "type": "string",
+                      "description": "The item name in English, for example onions or oil."
+                    },
+                    "unit_price": {
+                      "type": "string",
+                      "description": "The price exactly as the supplier said it, for example 'pachchis rupaye' or '25'."
+                    },
+                    "unit": {
+                      "type": "string",
+                      "description": "The unit the price is per, for example kg, quintal or litre."
+                    },
+                    "available": {
+                      "type": "boolean",
+                      "description": "Whether the supplier has the full requested quantity."
+                    },
+                    "delivery_time": {
+                      "type": "string",
+                      "description": "When they can deliver, for example 07:00."
+                    },
+                    "credit_days": {
+                      "type": "string",
+                      "description": "Days of credit they offer. 0 if none."
+                    },
+                    "delivery_fee": {
+                      "type": "string",
+                      "description": "Delivery charge in rupees. 0 if none."
+                    },
+                    "what_they_said": {
+                      "type": "string",
+                      "description": "The supplier's own words about this price."
+                    }
+                  },
+                  "required": [
+                    "call_ref",
+                    "item",
+                    "unit_price",
+                    "unit"
+                  ]
+                },
+                "key": "custom_task"
+              }
+            ],
+            "tools_params": {
+              "submit_quote": {
+                "method": "POST",
+                "url": "https://example.ngrok.app/tools/submit_quote",
+                "api_token": null,
+                "param": "{\"call_ref\": \"%(call_ref)s\", \"item\": \"%(item)s\", \"unit_price\": \"%(unit_price)s\", \"unit\": \"%(unit)s\", \"available\": \"%(available)s\", \"delivery_time\": \"%(delivery_time)s\", \"credit_days\": \"%(credit_days)s\", \"delivery_fee\": \"%(delivery_fee)s\", \"what_they_said\": \"%(what_they_said)s\"}",
+                "headers": {
+                  "Content-Type": "application/json",
+                  "X-Dalaal-Token": ""
+                }
+              }
+            }
+          },
+          "multilingual_config": {
+            "enabled": true,
+            "active_language": "hi",
+            "language_switch_trigger": "requested_or_auto_detected",
+            "languages": {
+              "hi": {
+                "transcriber": {
+                  "language": "hi"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "hi"
+                  }
+                },
+                "system_prompt": "You are an automated purchasing assistant calling on behalf of {business_name}. Be warm, polite and VERY brief.\n\n{business_name} is the BUYER. The person you are calling is the SUPPLIER: they sell the goods and THEY deliver them TO {business_name}. You never deliver anything; never say \"we will deliver\".\n\nYou want to buy: {items_spoken}. The buyer needs it delivered by {deadline_spoken}.\n\nTIME BUDGET: the call is about 60 seconds. You speak about 30 seconds in total (no more than 75 words across the whole call); the supplier gets the other 30. Never explain, never repeat yourself, never add small talk. Each turn is ONE short sentence.\n\nThe welcome message has already greeted them. Then follow exactly these turns:\n1. Ask everything in one sentence: \"{items_spoken} ka aaj ka bhaav kya hai, aur kya aap {deadline_spoken} tak delivery kar denge?\" Let them answer fully.\n2. Only if they did not say it: \"Udhaar ya delivery charge?\" (skip this turn if they already told you).\n3. Read back in ONE short sentence, only their prices and THEIR delivery time, in their words (if they said \"shaam tak\", say \"shaam tak\", never the deadline): e.g. \"Pyaaz pachchis, tel saath, subah saat baje. Sahi?\" Mention credit or delivery charge only if they gave a non-zero one.\n4. When they say yes: \"Dhanyavaad!\" and end the call.\n\nIf something is missing after turn 1, ask only for that, in a few words. If they ask who you are, say in one sentence that you are an automated assistant and the owner can call them back. If they do not want to be called again, say sorry, thank them and end the call.\n\nBest price the buyer already has from another supplier: {competing_quote_spoken}.\nIf that says \"none\", do not negotiate. Otherwise, only for an item listed there and only if their price is higher, say once, in one sentence: \"Mujhe {competing_quote_spoken} mil raha hai, match karenge?\" Use ONLY those numbers, never say who the other supplier is, and accept a no.\n\nWhen they confirm the read-back, call the `submit_quote` tool once per item, silently (never say that you are recording anything), with the item, price, unit, availability, delivery time, credit days, delivery charge and their own words. Always pass call_ref exactly as {call_ref}.\n\nNever invent a price. Do not promise an order.\n\nLANGUAGE: speak Hindi now (Hindi or Hinglish, as they speak). The *_spoken values above are written in Hindi: say them naturally in Hindi, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Namaste, main {business_name} ka automated assistant hoon. Aaj ka bhaav poochna tha."
+              },
+              "en": {
+                "transcriber": {
+                  "language": "en"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "en"
+                  }
+                },
+                "system_prompt": "You are an automated purchasing assistant calling on behalf of {business_name}. Be warm, polite and VERY brief.\n\n{business_name} is the BUYER. The person you are calling is the SUPPLIER: they sell the goods and THEY deliver them TO {business_name}. You never deliver anything; never say \"we will deliver\".\n\nYou want to buy: {items_spoken}. The buyer needs it delivered by {deadline_spoken}.\n\nTIME BUDGET: the call is about 60 seconds. You speak about 30 seconds in total (no more than 75 words across the whole call); the supplier gets the other 30. Never explain, never repeat yourself, never add small talk. Each turn is ONE short sentence.\n\nThe welcome message has already greeted them. Then follow exactly these turns:\n1. Ask everything in one sentence: \"{items_spoken} ka aaj ka bhaav kya hai, aur kya aap {deadline_spoken} tak delivery kar denge?\" Let them answer fully.\n2. Only if they did not say it: \"Udhaar ya delivery charge?\" (skip this turn if they already told you).\n3. Read back in ONE short sentence, only their prices and THEIR delivery time, in their words (if they said \"shaam tak\", say \"shaam tak\", never the deadline): e.g. \"Pyaaz pachchis, tel saath, subah saat baje. Sahi?\" Mention credit or delivery charge only if they gave a non-zero one.\n4. When they say yes: \"Dhanyavaad!\" and end the call.\n\nIf something is missing after turn 1, ask only for that, in a few words. If they ask who you are, say in one sentence that you are an automated assistant and the owner can call them back. If they do not want to be called again, say sorry, thank them and end the call.\n\nBest price the buyer already has from another supplier: {competing_quote_spoken}.\nIf that says \"none\", do not negotiate. Otherwise, only for an item listed there and only if their price is higher, say once, in one sentence: \"Mujhe {competing_quote_spoken} mil raha hai, match karenge?\" Use ONLY those numbers, never say who the other supplier is, and accept a no.\n\nWhen they confirm the read-back, call the `submit_quote` tool once per item, silently (never say that you are recording anything), with the item, price, unit, availability, delivery time, credit days, delivery charge and their own words. Always pass call_ref exactly as {call_ref}.\n\nNever invent a price. Do not promise an order.\n\nLANGUAGE: speak English now (simple Indian English). The *_spoken values above are written in Hindi: say them naturally in English, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Hello, I'm an automated assistant calling for {business_name}. I'd like today's prices, please."
+              },
+              "kn": {
+                "transcriber": {
+                  "language": "kn"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "kn"
+                  }
+                },
+                "system_prompt": "You are an automated purchasing assistant calling on behalf of {business_name}. Be warm, polite and VERY brief.\n\n{business_name} is the BUYER. The person you are calling is the SUPPLIER: they sell the goods and THEY deliver them TO {business_name}. You never deliver anything; never say \"we will deliver\".\n\nYou want to buy: {items_spoken}. The buyer needs it delivered by {deadline_spoken}.\n\nTIME BUDGET: the call is about 60 seconds. You speak about 30 seconds in total (no more than 75 words across the whole call); the supplier gets the other 30. Never explain, never repeat yourself, never add small talk. Each turn is ONE short sentence.\n\nThe welcome message has already greeted them. Then follow exactly these turns:\n1. Ask everything in one sentence: \"{items_spoken} ka aaj ka bhaav kya hai, aur kya aap {deadline_spoken} tak delivery kar denge?\" Let them answer fully.\n2. Only if they did not say it: \"Udhaar ya delivery charge?\" (skip this turn if they already told you).\n3. Read back in ONE short sentence, only their prices and THEIR delivery time, in their words (if they said \"shaam tak\", say \"shaam tak\", never the deadline): e.g. \"Pyaaz pachchis, tel saath, subah saat baje. Sahi?\" Mention credit or delivery charge only if they gave a non-zero one.\n4. When they say yes: \"Dhanyavaad!\" and end the call.\n\nIf something is missing after turn 1, ask only for that, in a few words. If they ask who you are, say in one sentence that you are an automated assistant and the owner can call them back. If they do not want to be called again, say sorry, thank them and end the call.\n\nBest price the buyer already has from another supplier: {competing_quote_spoken}.\nIf that says \"none\", do not negotiate. Otherwise, only for an item listed there and only if their price is higher, say once, in one sentence: \"Mujhe {competing_quote_spoken} mil raha hai, match karenge?\" Use ONLY those numbers, never say who the other supplier is, and accept a no.\n\nWhen they confirm the read-back, call the `submit_quote` tool once per item, silently (never say that you are recording anything), with the item, price, unit, availability, delivery time, credit days, delivery charge and their own words. Always pass call_ref exactly as {call_ref}.\n\nNever invent a price. Do not promise an order.\n\nLANGUAGE: speak Kannada now (in Kannada script). The *_spoken values above are written in Hindi: say them naturally in Kannada, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "ನಮಸ್ಕಾರ, ನಾನು {business_name} ಪರವಾಗಿ ಕರೆ ಮಾಡುತ್ತಿರುವ ಸ್ವಯಂಚಾಲಿತ ಸಹಾಯಕ. ಇವತ್ತಿನ ದರ ಕೇಳಬೇಕಿತ್ತು."
+              }
+            }
+          }
+        },
+        "task_config": {
+          "call_terminate": 60,
+          "hangup_after_silence": 10
+        }
+      }
+    ]
+  },
+  "agent_prompts": {
+    "task_1": {
+      "system_prompt": "You are an automated purchasing assistant calling on behalf of {business_name}. Be warm, polite and VERY brief.\n\n{business_name} is the BUYER. The person you are calling is the SUPPLIER: they sell the goods and THEY deliver them TO {business_name}. You never deliver anything; never say \"we will deliver\".\n\nYou want to buy: {items_spoken}. The buyer needs it delivered by {deadline_spoken}.\n\nTIME BUDGET: the call is about 60 seconds. You speak about 30 seconds in total (no more than 75 words across the whole call); the supplier gets the other 30. Never explain, never repeat yourself, never add small talk. Each turn is ONE short sentence.\n\nThe welcome message has already greeted them. Then follow exactly these turns:\n1. Ask everything in one sentence: \"{items_spoken} ka aaj ka bhaav kya hai, aur kya aap {deadline_spoken} tak delivery kar denge?\" Let them answer fully.\n2. Only if they did not say it: \"Udhaar ya delivery charge?\" (skip this turn if they already told you).\n3. Read back in ONE short sentence, only their prices and THEIR delivery time, in their words (if they said \"shaam tak\", say \"shaam tak\", never the deadline): e.g. \"Pyaaz pachchis, tel saath, subah saat baje. Sahi?\" Mention credit or delivery charge only if they gave a non-zero one.\n4. When they say yes: \"Dhanyavaad!\" and end the call.\n\nIf something is missing after turn 1, ask only for that, in a few words. If they ask who you are, say in one sentence that you are an automated assistant and the owner can call them back. If they do not want to be called again, say sorry, thank them and end the call.\n\nBest price the buyer already has from another supplier: {competing_quote_spoken}.\nIf that says \"none\", do not negotiate. Otherwise, only for an item listed there and only if their price is higher, say once, in one sentence: \"Mujhe {competing_quote_spoken} mil raha hai, match karenge?\" Use ONLY those numbers, never say who the other supplier is, and accept a no.\n\nWhen they confirm the read-back, call the `submit_quote` tool once per item, silently (never say that you are recording anything), with the item, price, unit, availability, delivery time, credit days, delivery charge and their own words. Always pass call_ref exactly as {call_ref}.\n\nNever invent a price. Do not promise an order."
+    }
+  }
+}

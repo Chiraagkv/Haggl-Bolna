@@ -1,0 +1,37 @@
+{
+  "_README": "Extractions (Bolna 'dispositions') created on each agent by app/bolna_setup.py; edit here and re-run scripts/start.py, changed questions are replaced. The code reads each answer by its exact name (services.extraction_value). Keep answers to one word or one number where possible: Bolna's extractor sometimes answers in a sentence even when asked for JSON, and services.yes_no/number read those leniently.",
+  "category": "Dalaal",
+  "by_kind": {
+    "supplier_r1": [
+      "quotes_json",
+      "do_not_call"
+    ],
+    "supplier_r2": [
+      "quotes_json",
+      "do_not_call"
+    ],
+    "approval": [
+      "approval"
+    ],
+    "confirm": [
+      "confirmed",
+      "confirm_changed",
+      "confirm_total",
+      "confirm_delivery_time"
+    ],
+    "intake": [
+      "order_json"
+    ],
+    "callback": []
+  },
+  "questions": {
+    "quotes_json": "From this call, list every item the supplier quoted a price for. Return ONLY a JSON array, no other text. Each element: {\"item\": \"<English item name, lowercase>\", \"unit_price\": \"<the price number as said, e.g. 25>\", \"unit\": \"<kg, quintal or litre>\", \"available\": <true or false>, \"delivery_time\": \"<HH:MM or the supplier's words, e.g. shaam tak>\", \"credit_days\": <number, 0 if none>, \"delivery_fee\": <number, 0 if none>, \"what_they_said\": \"<the supplier's own words about this price>\"}. Use the FINAL price the supplier agreed to. If no price was given, return [].",
+    "do_not_call": "Did the person ask not to be called again? Answer exactly yes or no.",
+    "approval": "Did the owner clearly approve booking this order? Answer with one word: yes, no or unclear.",
+    "order_json": "Return ONLY JSON: {\"items\": [{\"name\": \"<English item, lowercase>\", \"quantity\": <number>, \"unit\": \"kg or litre or piece\"}], \"deadline\": \"<HH:MM 24h>\", \"budget\": <rupees or null>}",
+    "confirmed": "Did the supplier clearly say yes to supplying this order at the quantities and prices the agent read out? Answer with one word: yes or no.",
+    "confirm_changed": "Did the supplier change, dispute or refuse any quantity, price or delivery time during the call? Answer with one word: yes or no.",
+    "confirm_total": "What total amount in rupees did the supplier agree to? Answer with only the number, for example 900. If no total was agreed, answer 0.",
+    "confirm_delivery_time": "By what time did the supplier say they will deliver to the buyer? Answer briefly as HH:MM (for example 07:00) or in the supplier's words. If not said, answer none."
+  }
+}

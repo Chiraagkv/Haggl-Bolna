@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: dalaal
+      POSTGRES_PASSWORD: dalaal
+      POSTGRES_DB: dalaal
+    ports:
+      - "5432:5432"
+    volumes:
+      - dalaal_pg:/var/lib/postgresql/data
+
+volumes:
+  dalaal_pg:

@@ -1,0 +1,5 @@
+{
+  "_note": "ILLUSTRATIVE ranges used only to raise a 'check this price' flag; they never change a ranking. Replace with real mandi/Agmarknet data for your city before relying on them. Prices per base unit (kg or litre).",
+  "onions": {"unit": "kg", "low": 18, "high": 38},
+  "oil": {"unit": "litre", "low": 50, "high": 75}
+}

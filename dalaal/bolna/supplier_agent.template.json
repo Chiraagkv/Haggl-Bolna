@@ -1,0 +1,51 @@
+{
+  "_README": "Template for POST /v2/agent. Keys starting with an underscore are removed before sending. Structure follows Bolna's AGENTS.md (pipelines is an array of arrays). Bolna requires `language` (plain ISO code, e.g. hi, never hi-IN) in the sarvam synthesizer provider_config. The transcriber extras are UNVERIFIED guesses: if Bolna rejects them it prints its exact error, then adjust, or create the agent in the dashboard and set SUPPLIER_AGENT_ID. Change 'plivo' to 'twilio' if that is your telephony provider.",
+  "agent_config": {
+    "agent_name": "Dalaal supplier agent (round 1, Hindi)",
+    "agent_welcome_message": "Namaste! Main {business_name} ki taraf se ek automated assistant bol raha hoon. Kya aapse kuch saaman ka bhaav pooch sakta hoon?",
+    "webhook_url": "{{PUBLIC_BASE_URL}}/webhook/bolna",
+    "tasks": [
+      {
+        "task_type": "conversation",
+        "toolchain": {
+          "execution": "sequential",
+          "pipelines": [["transcriber", "llm", "synthesizer"]]
+        },
+        "tools_config": {
+          "llm_agent": {
+            "agent_type": "simple_llm_agent",
+            "agent_flow_type": "streaming",
+            "llm_config": {
+              "provider": "openai",
+              "model": "gpt-4.1-mini",
+              "max_tokens": 150,
+              "temperature": 0.2
+            }
+          },
+          "synthesizer": {
+            "provider": "sarvam",
+            "provider_config": { "voice": "kavya", "voice_id": "kavya", "model": "bulbul:v3", "language": "hi" },
+            "stream": true,
+            "buffer_size": 100,
+            "audio_format": "wav"
+          },
+          "transcriber": {
+            "provider": "sarvam",
+            "model": "saaras:v4",
+            "language": "hi",
+            "stream": true,
+            "encoding": "linear16",
+            "sampling_rate": 16000,
+            "endpointing": 100
+          },
+          "input": { "provider": "plivo", "format": "wav" },
+          "output": { "provider": "plivo", "format": "wav" }
+        },
+        "task_config": { "call_terminate": 60, "hangup_after_silence": 10 }
+      }
+    ]
+  },
+  "agent_prompts": {
+    "task_1": { "system_prompt": "{{SYSTEM_PROMPT}}" }
+  }
+}

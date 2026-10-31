@@ -1,0 +1,127 @@
+{
+  "agent_config": {
+    "agent_name": "Dalaal owner report",
+    "agent_welcome_message": "Namaste {owner_name} ji, main Dalaal bol raha hoon, automated assistant. Aapke order ki khabar hai.",
+    "webhook_url": "https://example.ngrok.app/webhook/bolna",
+    "tasks": [
+      {
+        "task_type": "conversation",
+        "toolchain": {
+          "execution": "sequential",
+          "pipelines": [
+            [
+              "transcriber",
+              "llm",
+              "synthesizer"
+            ]
+          ]
+        },
+        "tools_config": {
+          "llm_agent": {
+            "agent_type": "simple_llm_agent",
+            "agent_flow_type": "streaming",
+            "llm_config": {
+              "provider": "openai",
+              "model": "gpt-4.1-mini",
+              "max_tokens": 150,
+              "temperature": 0.2
+            }
+          },
+          "synthesizer": {
+            "provider": "sarvam",
+            "provider_config": {
+              "voice": "kavya",
+              "voice_id": "kavya",
+              "model": "bulbul:v3",
+              "language": "hi"
+            },
+            "stream": true,
+            "buffer_size": 100,
+            "audio_format": "wav"
+          },
+          "transcriber": {
+            "provider": "sarvam",
+            "model": "saaras:v4",
+            "language": "hi",
+            "stream": true,
+            "encoding": "linear16",
+            "sampling_rate": 16000,
+            "endpointing": 100
+          },
+          "input": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "output": {
+            "provider": "plivo",
+            "format": "wav"
+          },
+          "multilingual_config": {
+            "enabled": true,
+            "active_language": "hi",
+            "language_switch_trigger": "requested_or_auto_detected",
+            "languages": {
+              "hi": {
+                "transcriber": {
+                  "language": "hi"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "hi"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner, to report a finished order. Be brief, friendly and honest.\n\nSay who you are, then give this report in your own natural words, without changing any number: {message}\n\nAsk if they have any question. If they say something is wrong, say you will note it and the team will check; do not argue and do not promise refunds. Thank them and end the call within 45 seconds.\n\nLANGUAGE: speak Hindi now (Hindi or Hinglish, as they speak). The *_spoken values above are written in Hindi: say them naturally in Hindi, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Namaste {owner_name} ji, main Dalaal bol raha hoon, automated assistant. Aapke order ki khabar hai."
+              },
+              "en": {
+                "transcriber": {
+                  "language": "en"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "en"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner, to report a finished order. Be brief, friendly and honest.\n\nSay who you are, then give this report in your own natural words, without changing any number: {message}\n\nAsk if they have any question. If they say something is wrong, say you will note it and the team will check; do not argue and do not promise refunds. Thank them and end the call within 45 seconds.\n\nLANGUAGE: speak English now (simple Indian English). The *_spoken values above are written in Hindi: say them naturally in English, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "Hello {owner_name}, this is Dalaal, your automated assistant, with news about your order."
+              },
+              "kn": {
+                "transcriber": {
+                  "language": "kn"
+                },
+                "synthesizer": {
+                  "provider": "sarvam",
+                  "provider_config": {
+                    "voice": "kavya",
+                    "voice_id": "kavya",
+                    "model": "bulbul:v3",
+                    "language": "kn"
+                  }
+                },
+                "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner, to report a finished order. Be brief, friendly and honest.\n\nSay who you are, then give this report in your own natural words, without changing any number: {message}\n\nAsk if they have any question. If they say something is wrong, say you will note it and the team will check; do not argue and do not promise refunds. Thank them and end the call within 45 seconds.\n\nLANGUAGE: speak Kannada now (in Kannada script). The *_spoken values above are written in Hindi: say them naturally in Kannada, keeping every number exactly the same. Keep the same turns and the same time budget.",
+                "welcome_message": "ನಮಸ್ಕಾರ {owner_name}, ನಾನು ದಲಾಲ್, ಸ್ವಯಂಚಾಲಿತ ಸಹಾಯಕ. ನಿಮ್ಮ ಆರ್ಡರ್ ಬಗ್ಗೆ ಸುದ್ದಿ ಇದೆ."
+              }
+            }
+          }
+        },
+        "task_config": {
+          "call_terminate": 60,
+          "hangup_after_silence": 10
+        }
+      }
+    ]
+  },
+  "agent_prompts": {
+    "task_1": {
+      "system_prompt": "You are Dalaal, an automated purchasing assistant, calling {owner_name}, the owner, to report a finished order. Be brief, friendly and honest.\n\nSay who you are, then give this report in your own natural words, without changing any number: {message}\n\nAsk if they have any question. If they say something is wrong, say you will note it and the team will check; do not argue and do not promise refunds. Thank them and end the call within 45 seconds."
+    }
+  }
+}

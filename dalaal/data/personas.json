@@ -1,0 +1,69 @@
+{
+  "_note": "Seed data for the demo and tests (ticket #6). Histories are typed in by hand and we say so on stage. Phone numbers are placeholders: replace with each teammate's VERIFIED number before any real call.",
+  "owner": {
+    "name": "Priya",
+    "business_name": "Priya's Cloud Kitchen",
+    "language": "hi",
+    "phone": "+910000000000",
+    "usual_prices": { "onions": { "price": 30, "unit": "kg" }, "oil": { "price": 70, "unit": "litre" } },
+    "demo_order": {
+      "items": [
+        { "name": "onions", "quantity": 20, "unit": "kg" },
+        { "name": "oil", "quantity": 10, "unit": "litre" }
+      ],
+      "deadline": "07:00",
+      "budget": 1200,
+      "spoken": "20 kilo pyaaz aur 10 litre oil, kal subah 7 baje tak, budget 1200"
+    }
+  },
+  "suppliers": [
+    {
+      "key": "kumar",
+      "name": "Kumar Stores",
+      "language": "hi",
+      "role": "Cheapest on paper, but unreliable. Promises 7:00 am so his only weakness is his record.",
+      "played_by": "TBD teammate",
+      "phone": "+910000000001",
+      "history": { "on_time": 1, "late": 2 },
+      "quote": { "onions": 25, "oil": 60, "delivery": "07:00", "credit_days": 0, "delivery_fee": 0 }
+    },
+    {
+      "key": "ramesh",
+      "name": "Ramesh Traders",
+      "language": "hi",
+      "role": "Reliable and the haggler: drops his price in round 2 when told a lower real quote exists.",
+      "played_by": "TBD teammate",
+      "phone": "+910000000002",
+      "history": { "on_time": 9, "late": 1 },
+      "quote": { "onions": 26, "oil": 62, "delivery": "06:30", "credit_days": 0, "delivery_fee": 0 },
+      "round2": { "will_drop_to": { "onions": 25, "oil": 60 }, "credit_days_if_asked": 7 }
+    },
+    {
+      "key": "gowda",
+      "name": "Gowda Vegetables",
+      "language": "kn",
+      "role": "Speaks Kannada. Solid record, a little more expensive.",
+      "played_by": "TBD teammate",
+      "phone": "+910000000003",
+      "history": { "on_time": 8, "late": 2 },
+      "quote": { "onions": 27, "oil": 64, "delivery": "06:45", "credit_days": 0, "delivery_fee": 0 }
+    },
+    {
+      "key": "lakshmi",
+      "name": "Lakshmi Agencies",
+      "language": "hi",
+      "role": "Has no oil, so she is a partial order. Used for the optional split-basket variant.",
+      "played_by": "TBD teammate",
+      "phone": "+910000000004",
+      "history": { "on_time": 0, "late": 0 },
+      "quote": { "onions": 28, "oil": null, "delivery": "07:00", "credit_days": 0, "delivery_fee": 0 },
+      "split_variant": { "onions": 22 }
+    }
+  ],
+  "expected_ranking": {
+    "lateness_cost": 300,
+    "prior": { "a": 1, "b": 3 },
+    "expected_cost": { "kumar": 1229, "ramesh": 1183, "gowda": 1244 },
+    "winner": "ramesh"
+  }
+}
